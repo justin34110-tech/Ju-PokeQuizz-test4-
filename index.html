@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="fr">
+<meta charset="utf-8"/>
+<title>Ju PokéQuizz</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<style>
+/* === THEME FUTURISTE + LAYOUT === */
+:root{
+  --bg:#071022; --card:#0f1420; --muted:#9aa4b2; --glass: rgba(255,255,255,0.04);
+  --radius:16px;
+}
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+*{box-sizing:border-box}
+body{
+  margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
+  font-family:'Orbitron',system-ui,Segoe UI,Arial; background: radial-gradient(1000px 400px at 10% 10%, #081029 0%, #04050a 30%, #000 100%);
+  color:#e6eef8; padding:28px;
+}
+.container{width:100%;max-width:1100px}
+.header{
+  display:flex; align-items:center; justify-content:center; gap:14px; margin-bottom:18px;
+}
+.title{
+  display:flex;align-items:center;gap:12px;font-size:26px;color:linear-gradient(90deg,#6ee7b7,#60a5fa);
+}
+.logo-sml{width:34px;height:34px;display:inline-block}
+.card{
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border:1px solid rgba(255,255,255,0.04); border-radius:var(--radius); padding:18px; box-shadow: 0 10px 40px rgba(8,10,20,0.6);
+  display:grid; grid-template-columns: 280px 1fr; gap:20px; align-items:start;
+}
+.preview{
+  display:flex;flex-direction:column;align-items:center;gap:12px;
+}
+.card-img{
+  width:260px;height:260px;border-radius:14px;background:linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  display:flex;align-items:center;justify-content:center; overflow:hidden; position:relative;
+  border:1px solid rgba(255,255,255,0.04);
+}
+.card-img img{max-width:92%;max-height:92%;image-rendering: -webkit-optimize-contrast; transition: transform .35s ease;}
+.meta{font-size:14px;color:var(--muted); text-align:center}
+.controls{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+.input, .btn, .num {
+  background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); color:inherit; padding:10px 12px;border-radius:10px;
+}
+.input:focus{outline:none;box-shadow:0 0 12px rgba(96,165,250,0.12);border-color:#60a5fa}
+.btn{cursor:pointer; font-weight:700; letter-spacing:0.4px; transition: transform .12s ease, box-shadow .12s}
+.btn:active{transform:translateY(1px)}
+.types-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.type-chip{padding:8px 10px;border-radius:999px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.04);display:inline-flex;align-items:center;gap:8px}
+.right{
+  padding-left:6px; display:flex;flex-direction:column; gap:12px;
+}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.feedback{font-weight:700}
+.ok{color:#7ef6b3}
+.bad{color:#ff7a9a}
+.stat{color:var(--muted);font-size:13px}
+.footer{margin-top:12px;font-size:13px;color:var(--muted);text-align:center}
+
+/* responsive */
+@media (max-width:880px){
+  .card{grid-template-columns:1fr;align-items:center}
+  .card-img{width:200px;height:200px}
+}
+</style>
+
+<body>
+<div class="container">
+  <div class="header">
+    <!-- Instagram SVG -->
+    <div class="logo-sml" title="Instagram">
+      <svg viewBox="0 0 512 512" width="100%" height="100%"><linearGradient id="g1" x1="0" x2="1"><stop offset="0" stop-color="#f58529"/><stop offset="0.5" stop-color="#dd2a7b"/><stop offset="1" stop-color="#8134af"/></linearGradient><path fill="url(#g1)" d="M349.33 69.33H162.67C118.88 69.33 84.67 103.54 84.67 147.33v186.67c0 43.79 34.21 77.99 78 77.99h186.67c43.79 0 78-34.2 78-78V147.33c0-43.79-34.21-78-78-78z"/><circle cx="256" cy="256" r="72" fill="#fff" opacity=".95"/><circle cx="350" cy="130" r="24" fill="#fff"/></svg>
+    </div>
+
+    <div style="text-align:center">
+      <div style="font-size:18px;color:#7ee7ff;letter-spacing:0.6px">Ju PokéQuizz</div>
+      <div style="font-size:12px;color:var(--muted)">Teste ton Pokédex — nom, type(s) & évolutions</div>
+    </div>
+
+    <!-- TikTok SVG -->
+    <div class="logo-sml" title="TikTok">
+      <svg viewBox="0 0 256 256" width="100%" height="100%"><path d="M168 56v92a40 40 0 1 1-40-40v28a12 12 0 0 0 12 12 12 12 0 0 0 12-12V92h16V56z" fill="#00f2ea"/><path d="M168 56v92a40 40 0 1 1-40-40V84a36 36 0 0 0 36 36V56z" fill="#ff0047" opacity=".95"/></svg>
+    </div>
+  </div>
+
+  <div class="card" id="cardRoot">
+    <div class="preview">
+      <div class="card-img" id="imgWrap">
+        <img id="art" alt="Artwork Pokémon" src="" />
+      </div>
+      <div class="meta">N° <span id="pnum">—</span> • <strong id="pname">???</strong></div>
+
+      <div class="controls">
+        <button class="btn" id="prevBtn">⬅ Précédent</button>
+        <button class="btn" id="nextBtn">Suivant ➡</button>
+        <button class="btn" id="randBtn">🎲 Aléatoire</button>
+        <input id="goto" class="input num" type="number" min="1" placeholder="N°"/>
+        <button class="btn" id="gotoBtn">Aller</button>
+      </div>
+
+      <div class="stat">Score : <span id="score">0</span> / <span id="max">1025</span> • Tentatives : <span id="attempts">0</span></div>
+    </div>
+
+    <div class="right">
+      <div>
+        <div style="font-size:14px;color:var(--muted)">Tape le nom en français :</div>
+        <input id="nameInput" class="input" placeholder="Nom du Pokémon (accent OK)"/>
+      </div>
+
+      <div>
+        <div style="font-size:14px;color:var(--muted)">Choisis le(s) type(s) :</div>
+        <div id="typesContainer" class="types-grid" aria-live="polite"></div>
+      </div>
+
+      <div>
+        <div style="font-size:14px;color:var(--muted)">Évolution :</div>
+        <div class="row">
+          <label class="type-chip"><input type="radio" name="evo" value="pre"> Pré-évolution existante</label>
+          <label class="type-chip"><input type="radio" name="evo" value="post"> A des évolutions</label>
+          <label class="type-chip"><input type="radio" name="evo" value="none"> Aucune</label>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;align-items:center">
+        <button id="checkBtn" class="btn" style="padding:10px 16px">✅ Vérifier</button>
+        <div id="feedback" class="feedback" style="min-width:160px"></div>
+      </div>
+
+      <div style="margin-top:6px;color:var(--muted);font-size:13px">
+        Astuce : le nom est caché jusqu'à la correction — le fond s'adapte au(x) type(s) correct(s).
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">Données et images : PokéAPI • Créé par Ju PokéQuizz</div>
+</div>
+
+<script>
+/* ---------- Config & mapping couleurs/types FR ---------- */
+const apiBase = 'https://pokeapi.co/api/v2';
+const MAX_POKE = 1025; // limite aléatoire + max affiché
+const TYPE_META = {
+  normal:{fr:'Normal', color:'#A8A77A'},
+  fire:{fr:'Feu', color:'#EE8130'},
+  water:{fr:'Eau', color:'#6390F0'},
+  electric:{fr:'Électrik', color:'#F7D02C'},
+  grass:{fr:'Plante', color:'#7AC74C'},
+  ice:{fr:'Glace', color:'#96D9D6'},
+  fighting:{fr:'Combat', color:'#C22E28'},
+  poison:{fr:'Poison', color:'#A33EA1'},
+  ground:{fr:'Sol', color:'#E2BF65'},
+  flying:{fr:'Vol', color:'#A98FF3'},
+  psychic:{fr:'Psy', color:'#F95587'},
+  bug:{fr:'Insecte', color:'#A6B91A'},
+  rock:{fr:'Roc', color:'#B6A136'},
+  ghost:{fr:'Spectre', color:'#735797'},
+  dragon:{fr:'Dragon', color:'#6F35FC'},
+  dark:{fr:'Ténèbres', color:'#705746'},
+  steel:{fr:'Acier', color:'#B7B7CE'},
+  fairy:{fr:'Fée', color:'#D685AD'}
+};
+
+/* ---------- UI refs ---------- */
+const artEl = document.getElementById('art');
+const pnumEl = document.getElementById('pnum');
+const pnameEl = document.getElementById('pname');
+const typesContainer = document.getElementById('typesContainer');
+const nameInput = document.getElementById('nameInput');
+const feedbackEl = document.getElementById('feedback');
+const prevBtn = document.getElementById('prevBtn'), nextBtn = document.getElementById('nextBtn');
+const randBtn = document.getElementById('randBtn'), gotoBtn = document.getElementById('gotoBtn');
+const checkBtn = document.getElementById('checkBtn');
+const gotoInput = document.getElementById('goto');
+const scoreEl = document.getElementById('score'), attemptsEl = document.getElementById('attempts');
+const maxEl = document.getElementById('max'), cardRoot = document.getElementById('cardRoot');
+
+let currentId = 1;
+let score = 0, attempts = 0;
+let checkedThis = false; // empêche incrément multiple
+let currentCorrect = {name:'', types:[], evo:'none'}; // store correct answers
+maxEl.textContent = MAX_POKE;
+
+/* ---------- Helpers ---------- */
+function normalize(s){ return (s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9 -]/g,'').trim(); }
+async function fetchJson(url){ const r = await fetch(url); if(!r.ok) throw new Error('API error'); return r.json(); }
+
+/* Preload image helper */
+function preloadImage(url){
+  return new Promise((res)=>{ 
+    if(!url) return res(null);
+    const img = new Image();
+    img.onload = ()=>res(url);
+    img.onerror = ()=>res(null);
+    img.src = url;
+  });
+}
+
+/* Set background gradient based on types */
+function applyTypeBackground(types){
+  if(!types || types.length===0){ cardRoot.style.background=''; return; }
+  const colors = types.map(t => TYPE_META[t]?.color || '#333');
+  if(colors.length===1){
+    cardRoot.style.background = `linear-gradient(180deg, ${shade(colors[0],0.06)}, ${shade(colors[0],-0.12)})`;
+  } else {
+    cardRoot.style.background = `linear-gradient(90deg, ${shade(colors[0],0.06)} 0%, ${shade(colors[1],-0.05)} 100%)`;
+  }
+}
+/* simple shade */
+function shade(hex, percent){
+  const f=parseInt(hex.slice(1),16),t=percent<0?0:255,p=Math.abs(percent);
+  const R=Math.round((t - ( (t - (f>>16)) ) )*p + (f>>16) );
+  const G=Math.round((t - ( (t - ((f>>8)&0x00FF)) ) )*p + ((f>>8)&0x00FF));
+  const B=Math.round((t - ( (t - (f&0x0000FF)) ) )*p + (f&0x0000FF));
+  return '#'+(0x1000000 + (R<<16) + (G<<8) + B).toString(16).slice(1);
+}
+
+/* Build type chips (all types available) */
+function buildTypeChips(){
+  typesContainer.innerHTML = '';
+  Object.keys(TYPE_META).forEach(k=>{
+    const lbl = document.createElement('label');
+    lbl.className='type-chip';
+    const cb = document.createElement('input');
+    cb.type='checkbox'; cb.value=k;
+    lbl.appendChild(cb);
+    const span = document.createElement('span');
+    span.style.fontSize='13px'; span.style.marginLeft='6px'; span.textContent = TYPE_META[k].fr;
+    lbl.appendChild(span);
+    typesContainer.appendChild(lbl);
+  });
+}
+
+/* Read selected types (api names) */
+function getSelectedTypes(){ return Array.from(typesContainer.querySelectorAll('input:checked')).map(i=>i.value); }
+/* Read selected evolution radio */
+function getSelectedEvo(){ const r = document.querySelector('input[name="evo"]:checked'); return r? r.value : null; }
+
+/* mark correct chips visually after check */
+function markCorrectTypes(correctTypes){
+  Array.from(typesContainer.querySelectorAll('label')).forEach(lbl=>{
+    const cb = lbl.querySelector('input');
+    if(correctTypes.includes(cb.value)){
+      lbl.style.borderColor = '#ffffff66';
+      lbl.style.boxShadow = `0 6px 18px ${TYPE_META[cb.value].color}55`;
+      lbl.style.background = `linear-gradient(180deg, rgba(255,255,255,0.02), ${TYPE_META[cb.value].color}11)`;
+    } else {
+      lbl.style.opacity = '0.55';
+      cb.checked = cb.checked; // keep user choices visible
+    }
+  });
+}
+
+/* ---------- Load current pokemon ---------- */
+async function loadPokemon(id){
+  // reset
+  feedbackEl.textContent=''; nameInput.value=''; checkedThis=false;
+  document.querySelectorAll('input[name="evo"]').forEach(i=>i.checked=false);
+  buildTypeChips();
+  pnumEl.textContent = id;
+  pnameEl.textContent = '???';
+  artEl.src = ''; artEl.style.transform='scale(0.98)'; // small transition
+  // fetch pokemon + species + evolution chain
+  try{
+    const p = await fetchJson(`${apiBase}/pokemon/${id}`);
+    const sp = await fetchJson(`${apiBase}/pokemon-species/${id}`);
+    // name FR
+    const frNameObj = (sp.names||[]).find(n=>n.language?.name==='fr');
+    const frName = frNameObj? frNameObj.name : sp.name;
+    // correct types (api names)
+    const correctTypes = (p.types||[]).map(t=>t.type.name);
+    // preload image (official-artwork preferred)
+    const imgUrl = p.sprites?.other?.['official-artwork']?.front_default || p.sprites?.front_default || '';
+    const pre = await preloadImage(imgUrl);
+    if(pre) artEl.src = pre;
+    else artEl.src = '';
+    artEl.style.transform='scale(1)';
+    // evolution infos: pre-evo?
+    const hasPre = !!sp.evolves_from_species;
+    // check evolutions via evolution-chain endpoint:
+    let hasPost = false;
+    if(sp.evolution_chain && sp.evolution_chain.url){
+      try{
+        const chain = await fetchJson(sp.evolution_chain.url);
+        // traverse chain to find node corresponding to this species name
+        function traverse(node){
+          if(!node) return false;
+          if(node.species.name === sp.name){
+            if(node.evolves_to && node.evolves_to.length>0) return true;
+            return false;
+          }
+          for(const c of node.evolves_to || []){
+            const r = traverse(c);
+            if(r) return true;
+          }
+          return false;
+        }
+        // If the species has evolves_to children anywhere where it is node -> hasPost true
+        // But traverse returns true only when node found and has evolves_to; else false
+        // We need to check entire tree: find node and inspect evolves_to
+        // We'll traverse to find node and set hasPost accordingly
+        function findAndSet(node){
+          if(node.species.name === sp.name){
+            hasPost = (node.evolves_to && node.evolves_to.length>0);
+            return true;
+          }
+          for(const c of node.evolves_to || []){
+            if(findAndSet(c)) return true;
+          }
+          return false;
+        }
+        findAndSet(chain.chain);
+      }catch(e){}
+    }
+    const evoStatus = hasPre ? 'pre' : (hasPost ? 'post' : 'none');
+    // store correct answers
+    currentCorrect = {name:frName, types:correctTypes, evo:evoStatus};
+    // store dataset on typesContainer for checking
+    typesContainer.dataset.correct = JSON.stringify(correctTypes);
+    nameInput.dataset.correct = frName;
+    // Apply background colors based on correct types AFTER a short delay for smoothness
+    applyTypeBackground([]); // reset until checked
+    // done
+  }catch(err){
+    feedbackEl.innerHTML = `<span class="bad">Erreur chargement #${id}</span>`;
+    console.error(err);
+  }
+}
+
+/* ---------- Check answer ---------- */
+function revealAndCheck(){
+  // prevent multiple checks incrementing the score
+  if(checkedThis) return;
+  attempts++;
+  attemptsEl.textContent = attempts;
+  // show name
+  pnameEl.textContent = nameInput.dataset.correct || '—';
+  // get correct
+  const correctTypes = JSON.parse(typesContainer.dataset.correct || '[]');
+  const selTypes = getSelectedTypes();
+  const selEvo = getSelectedEvo();
+  const correctEvo = currentCorrect.evo;
+  const typed = normalize(nameInput.value);
+  const correctNameNorm = normalize(nameInput.dataset.correct || '');
+  const okName = typed === correctNameNorm;
+  // types check as sets
+  const a = new Set(selTypes), b = new Set(correctTypes);
+  const okTypes = a.size === b.size && [...a].every(x=>b.has(x));
+  const okEvo = (selEvo === correctEvo);
+  // mark correct chips visually
+  markCorrectTypes(correctTypes);
+  // change background to type colors
+  applyTypeBackground(correctTypes);
+  // compute result: user wants one point per pokemon — I will award 1 point only if all three elements are correct
+  if(okName && okTypes && okEvo){
+    feedbackEl.innerHTML = `<span class="ok">✅ Correct — +1</span>`;
+    score = Math.min(score+1, MAX_POKE);
+    scoreEl.textContent = score;
+  } else {
+    // show detailed correct info
+    const correctLabels = correctTypes.map(t => TYPE_META[t]?.fr || t).join(' / ');
+    let evoLabel = '';
+    if(correctEvo === 'pre') evoLabel = 'A une pré-évolution';
+    else if(correctEvo === 'post') evoLabel = 'A des évolutions';
+    else evoLabel = "Aucune évolution";
+    feedbackEl.innerHTML = `<span class="bad">❌ Corrigé :</span> <div>Nom : <strong>${currentCorrect.name}</strong></div><div>Types : <strong>${correctLabels}</strong></div><div>${evoLabel}</div>`;
+  }
+  checkedThis = true; // lock scoring until next pokemon loaded
+}
+
+/* ---------- Navigation handlers ---------- */
+prevBtn.addEventListener('click', ()=>{ if(currentId>1){ currentId--; loadPokemon(currentId); checkedThis=false;} });
+nextBtn.addEventListener('click', ()=>{ if(currentId<MAX_POKE){ currentId++; loadPokemon(currentId); checkedThis=false;} });
+randBtn.addEventListener('click', ()=>{ currentId = Math.floor(Math.random()*MAX_POKE)+1; loadPokemon(currentId); checkedThis=false; });
+gotoBtn.addEventListener('click', ()=>{ const v = parseInt(gotoInput.value,10); if(!isNaN(v) && v>=1 && v<=MAX_POKE){ currentId=v; loadPokemon(currentId); checkedThis=false;} });
+
+checkBtn.addEventListener('click', revealAndCheck);
+
+/* initial build */
+buildTypeChips();
+loadPokemon(currentId);
+
+/* preload next pokemon image to improve feel */
+document.addEventListener('transitionend', ()=>{ /* no-op placeholder */ });
+</script>
+</body>
+</html>
